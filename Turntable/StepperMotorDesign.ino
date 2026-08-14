@@ -171,14 +171,14 @@ void reset(){
   	lcd.print("Done "); 
     Serial.println("STATUS:");
   	Serial.print("Index = ");
-	  Serial.print(currentIndex);
-	  Serial.print("  Steps = ");
-	  Serial.print(currentStep);
-	  Serial.print("  Angle = ");
-	  Serial.println(currentAngle);
+	Serial.print(currentIndex);
+	Serial.print("  Steps = ");
+	Serial.print(currentStep);
+	Serial.print("  Angle = ");
+	Serial.println(currentAngle);
 
     //may need to set everything to 0 to prevent software error 
-
+	  
     sweep = false; 
   }
 } 
