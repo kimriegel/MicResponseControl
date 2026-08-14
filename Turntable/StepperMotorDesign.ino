@@ -2,29 +2,46 @@
 
 #include <LiquidCrystal.h> 
 #include <Stepper.h>
+//Libraries necessary for program
 
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 //Identifies pins associated with the LCD
 
-const long stepsPerRev = 6400;
+//Constants relating to values associated with Stepper Motor
+const long stepsPerRev = 6400; //change to accommodate the stepper motor driver  
 const int indexPerRev = 72;
 const int stepDelay = 100;
 const int stepSpeed = 30; //30 RPM subject to change
 
+//Identifies later the exact quantity necessary to move for precision
+long targetStep = 0.0;
+long stepsToMove = 0.0;
+//long targetStep = (long)((currentIndex + 1) * stepsPerRev / indexPerRev);
+//long stepsToMove = targetStep - currentStep;
+
+//Current positions of stepper motor
 long currentStep = 0;
 int currentIndex = 0;
 float currentAngle = 0.00;
 
-bool homing = false;
-bool homed = false;
-bool sweep = false;
+Stepper stepper = Stepper(stepsPerRev, 7, 8, 9, 10); //may be replaced depending on driver type
+//Identifies pins associated with Stepper Motor 
 
-const int homePin = A0; //refers to push button with brown wiring
-const int movePin = A1; //refers to push button with gray wiring
-const int flagPin = A2; //refers to optical sensor with white wiring
-const int resetPin = A3; //refers to push button with purple wiring
+//Booleans 
+bool homing = false; //Is it in the process of homing?
+bool homed = false; //Is it already homed?
+bool sweep = false; //Has it reached a full rotation? 
 
-Stepper stepper = Stepper(stepsPerRev, 7, 8, 9, 10);
+//Buttons 
+const int homePin = A0; //refers to blue push button
+const int movePin = A1; //refers to green push button
+const int flagPin = A2; //refers to optical sensor/white push button
+const int resetPin = A3; //refers to red push button
+
+//LED
+const int statLED = A4; //refers to blue LED 
+//when ON = motor is currently measuring
+//when OFF = motor is no longer measuring
 
 void setup(){ 
   lcd.begin(16,2);
@@ -34,13 +51,13 @@ void setup(){
   lcd.print("Program");
   
   Serial.begin(9600);
-  Serial.println("Brown-Wired Button = Home Button");
-  Serial.println("Grey-Wired Button = Move Button");
-  Serial.println("White-Wired Button = Flag Button");
-  Serial.println("Purple-Wired Button = Reset Button");
+  Serial.println("Blue Button = Home Button");
+  Serial.println("Green Button = Move Button");
+  Serial.println("White Button = Flag Button");
+  Serial.println("Red Button = Reset Button");
   Serial.println(" ");
   Serial.println("STATUS: Motor is currently not homed.");
-  Serial.println("Press home button, then flag button to begin.");
+  Serial.println("Press home button, then flag button to begin."); //EDIT after optical sensor inputted 
   
   //sets all buttons as INPUT_PULLUP which means the Arduino board creates a resistance
   //** all inputs are inverted OFF = 1 ON = 0 
@@ -48,43 +65,76 @@ void setup(){
   pinMode(movePin, INPUT_PULLUP);
   pinMode(flagPin, INPUT_PULLUP);
   pinMode(resetPin, INPUT_PULLUP);
-  
+
+  pinMode(statLED, OUTPUT);
+
   stepper.setSpeed(stepSpeed);
 }
 
-void measurement(){ //called by pulse() when movement occurs
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Measuring "); 
-  delay(1500); 
+void loop(){ //constantly loops so that everytime a button is pressed
+  //one of these four functions "respond" 
+  home();
+  pulse();
+  checkSweep();
+  reset();
+}  
+
+void home(){
+  if (digitalRead(homePin) == LOW){ //if home button is pressed 
+    homing = true; 
+    lcd.clear();
+    lcd.setCursor(0,0);
+  	lcd.print("Homing "); 
   }
+  else if ((digitalRead(flagPin) == LOW) && (homing == true)){ //if flag button is pressed
+    lcd.clear(); 
+    lcd.setCursor(0,0);
+  	lcd.print("Homed "); 
+    homed = true;
+  }
+}              
 
 void pulse(){
   if ((homed == true) && (digitalRead(movePin) == LOW) && (sweep == false)){ 
     lcd.clear();
     lcd.setCursor(0,0);
   	lcd.print("Moving "); 
-  	stepper.step(89);
-  	delay(1000); 
+
+    targetStep = (long)((currentIndex + 1) * stepsPerRev / indexPerRev);
+    stepsToMove = targetStep - currentStep;
+
+  	stepper.step(stepsToMove);
+    currentStep = targetStep;
+  	delay(1000); //REVIEW delays 
     
   	measurement();
   	delay(1000); 
+
     lcd.clear();
- 	lcd.setCursor(0,0);
+ 	  lcd.setCursor(0,0);
   	lcd.print("Done");
-    currentIndex += 1; //will have a total 72 indexes b/c 72 * 5 degrees = 360 degrees 
-    currentStep += 89; //estimate for amount of steps taken if 6400
-    //steps per revolutions at 360 degrees 
-	currentAngle = (360 * currentStep/stepsPerRev);     
+
+    currentIndex += 1; 
+	  currentAngle = (360.0 * currentStep/stepsPerRev);     
+
     Serial.println("STATUS:");
   	Serial.print("Index = ");
-	Serial.print(currentIndex);
-	Serial.print("  Steps = ");
-	Serial.print(currentStep);
-	Serial.print("  Angle = ");
-	Serial.println(currentAngle);
+	  Serial.print(currentIndex);
+	  Serial.print("  Steps = ");
+	  Serial.print(currentStep);
+	  Serial.print("  Angle = ");
+	  Serial.println(currentAngle);
   } 
   else{}
+}
+
+void measurement(){ //called by pulse() when movement occurs
+  digitalWrite(statLED, HIGH);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Measuring "); 
+  delay(1500); //REVIEW delays 
+  digitalWrite(statLED, LOW);
 }
 
 void checkSweep(){
@@ -99,55 +149,36 @@ void checkSweep(){
   else{}
 }
 
-void direction(){
-  if (sweep == false){ //if not one full revolution
-    //digitalWrite(directionLED,HIGH); //remain in forward state
-  }
-  else{ //if one full revolution occurs
-  //digitalWrite(directionLED,LOW); //in reverse state
-  }
-  if (digitalRead(resetPin) == LOW){ //if reset occurs
+void reset(){
+  if ((digitalRead(resetPin) == LOW)){ //if reset occurs
     lcd.clear();
     lcd.setCursor(0,0);
   	lcd.print("Resetting "); 
-    while (currentIndex > 0){ //while the value is not at 0
-     stepper.step(-89);
-     currentIndex -= 1; //go down until index is at 0
-     currentStep -= 89;
-	 currentAngle = (360 * currentStep/stepsPerRev);     
-    }
+    while (currentIndex > 0){
+    currentIndex -= 1;
+
+    targetStep = (long)(currentIndex * stepsPerRev / indexPerRev);
+    stepsToMove = targetStep - currentStep;
+
+    stepper.step(stepsToMove);
+
+    currentStep = targetStep;
+    currentAngle = 360.0 * currentStep / stepsPerRev;
+  }
+
     lcd.clear();
     lcd.setCursor(0,0);
   	lcd.print("Done "); 
     Serial.println("STATUS:");
   	Serial.print("Index = ");
-	Serial.print(currentIndex);
-	Serial.print("  Steps = ");
-	Serial.print(currentStep);
-	Serial.print("  Angle = ");
-	Serial.println(currentAngle);
+	  Serial.print(currentIndex);
+	  Serial.print("  Steps = ");
+	  Serial.print(currentStep);
+	  Serial.print("  Angle = ");
+	  Serial.println(currentAngle);
+
+    //may need to set everything to 0 to prevent software error 
+
+    sweep = false; 
   }
 } 
-
-void home(){
-  if (digitalRead(homePin) == LOW){ //if home button is pressed 
-    homing = true; 
-    lcd.clear();
-    lcd.setCursor(0,0);
-  	lcd.print("Homing "); 
-  }
-  else if ((digitalRead(flagPin) == LOW) && (homing = true)){ //if flag button is pressed
-    	lcd.clear(); 
-    	lcd.setCursor(0,0);
-  		lcd.print("Homed "); 
-    	homed = true;
-    }
-   }    
-                      
-void loop(){ //constantly loops so that everytime a button is pressed
-  //one of these four functions "respond" 
-  home();
-  direction();
-  pulse();
-  checkSweep();
-}  
