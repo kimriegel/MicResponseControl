@@ -1,4 +1,5 @@
 //Draft of code required for Stepper Motor 
+//Likely no longer necessary but saving in case the driver changes 
 
 #include <LiquidCrystal.h> 
 #include <Stepper.h>
