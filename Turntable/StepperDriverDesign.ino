@@ -28,10 +28,10 @@ bool homed = false;
 bool sweep = false;
 
 //Buttons 
-const int homePin = A0; //refers to blue push button
-const int movePin = A1; //refers to green push button
-const int flagPin = A2; //refers to optical sensor/white push button
-const int resetPin = A3; //refers to red push button
+const int homePin = A2; //refers to blue push button
+const int movePin = A3; //refers to green push button
+const int flagPin = A0; //refers to optical sensor/white push button
+const int resetPin = A1; //refers to red push button
 
 const int statLED = A4; //refers to blue LED 
 //when ON = motor is currently measuring
@@ -104,6 +104,7 @@ void home(){ //if home button is pressed
     lcd.setCursor(0,0);
     lcd.print("Homed "); 
     homed = true;
+    homing = false;
   }
 }
 
@@ -203,3 +204,4 @@ void reset(){
     Serial.println(currentAngle);
   }
 }
+
