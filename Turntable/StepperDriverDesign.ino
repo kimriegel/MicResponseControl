@@ -7,7 +7,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 //Constants relating to values associated with Stepper Motor
 const long stepsPerRev = 6400; //May need to be changed 
 const int indexPerRev = 72; //72 * 5 degrees = 360 degrees 
-const int stepDelay = 100; //May need to be changed
+const int stepDelay = 1000; //May need to be changed
 
 //Connected to the driver 
 const int stepPin = 7;
@@ -26,6 +26,7 @@ float currentAngle = 0.00;
 bool homing = false;
 bool homed = false;
 bool sweep = false;
+bool resetting = false;
 
 //Buttons 
 const int homePin = A2; //refers to blue push button
@@ -75,21 +76,30 @@ void loop(){
 }
 
 void moveStepper(long steps){
-  if (steps > 0){ //moving foward
+  if (resetting == false){
+    for (long i = 0; i < steps; i++){
     digitalWrite(dirPin, HIGH);
-  }
-  else{ //prevents moving if already past 360 (from stepsToMove calculation)
-    digitalWrite(dirPin, LOW);
-    steps = -steps;
-  }
-
-  for (long i = 0; i < steps; i++){ //moving step by step until it reaches the amount needed
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(stepDelay);
 
     digitalWrite(stepPin, LOW);
     delayMicroseconds(stepDelay);
+    }
+  }  // counterclockwise
+  else if (resetting == true){
+    for (long i = 0; i > steps; i--){
+    digitalWrite(dirPin, HIGH);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(stepDelay);
+
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(stepDelay);
+    }
   }
+  else{
+    return;
+  }
+  delayMicroseconds(100);
 }
 
 void home(){ //if home button is pressed 
@@ -98,18 +108,25 @@ void home(){ //if home button is pressed
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Homing "); 
-    digitalWrite(stepPin, HIGH);
-    digitalWrite(dirPin, HIGH);
-
   }
-  else if ((digitalRead(flagPin) == LOW) && (homing == true)){
+
+  while ((digitalRead(flagPin) == HIGH) && (homing == true)){
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(stepDelay);
+
     digitalWrite(stepPin, LOW);
-    digitalWrite(dirPin, LOW);
+    delayMicroseconds(stepDelay);
+  }
+
+  if ((digitalRead(flagPin) == LOW) && (homing == true)){
     lcd.clear(); 
     lcd.setCursor(0,0);
     lcd.print("Homed "); 
     homed = true;
     homing = false;
+    currentStep = 0;
+    currentIndex = 0;
+    currentAngle = 0.0;
   }
 }
 
@@ -180,6 +197,7 @@ void reset(){
     lcd.print("Resetting "); 
 
     while (currentIndex > 0){
+      resetting = true;
       currentIndex -= 1;
 
       targetStep = (long)(currentIndex * stepsPerRev / indexPerRev);
@@ -191,6 +209,7 @@ void reset(){
       currentAngle = 360.0 * currentStep / stepsPerRev;
     }
     //prevent software discrepancies - may be unnecessary 
+    resetting = false;
     currentIndex = 0;
     currentStep = 0;
     currentAngle = 0.0;
