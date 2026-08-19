@@ -26,7 +26,6 @@ float currentAngle = 0.00;
 bool homing = false;
 bool homed = false;
 bool sweep = false;
-bool resetting = false;
 
 //Buttons 
 const int homePin = A2; //refers to blue push button
@@ -76,30 +75,26 @@ void loop(){
 }
 
 void moveStepper(long steps){
-  if (resetting == false){
-    for (long i = 0; i < steps; i++){
+  if (steps > 0){
     digitalWrite(dirPin, HIGH);
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(stepDelay);
-
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(stepDelay);
-    }
-  }  // counterclockwise
-  else if (resetting == true){
-    for (long i = 0; i > steps; i--){
-    digitalWrite(dirPin, HIGH);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(stepDelay);
-
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(stepDelay);
-    }
+  }
+  else if (steps < 0){
+    digitalWrite(dirPin, LOW);
+    steps = -steps;
   }
   else{
     return;
   }
+
   delayMicroseconds(100);
+
+  for (long i = 0; i < steps; i++){
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(stepDelay);
+
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(stepDelay);
+  }
 }
 
 void home(){ //if home button is pressed 
@@ -111,6 +106,8 @@ void home(){ //if home button is pressed
   }
 
   while ((digitalRead(flagPin) == HIGH) && (homing == true)){
+    digitalWrite(dirPin, HIGH);
+    
     digitalWrite(stepPin, HIGH);
     delayMicroseconds(stepDelay);
 
@@ -197,7 +194,6 @@ void reset(){
     lcd.print("Resetting "); 
 
     while (currentIndex > 0){
-      resetting = true;
       currentIndex -= 1;
 
       targetStep = (long)(currentIndex * stepsPerRev / indexPerRev);
@@ -209,7 +205,6 @@ void reset(){
       currentAngle = 360.0 * currentStep / stepsPerRev;
     }
     //prevent software discrepancies - may be unnecessary 
-    resetting = false;
     currentIndex = 0;
     currentStep = 0;
     currentAngle = 0.0;
