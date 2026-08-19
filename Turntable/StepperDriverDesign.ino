@@ -5,7 +5,7 @@
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 //Constants relating to values associated with Stepper Motor
-const long stepsPerRev = 51200; //May need to be changed 
+const long stepsPerRev = 6400; //May need to be changed 
 const int indexPerRev = 72; //72 * 5 degrees = 360 degrees 
 const int stepDelay = 100; //May need to be changed
 
@@ -98,8 +98,13 @@ void home(){ //if home button is pressed
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Homing "); 
+    digitalWrite(stepPin, HIGH);
+    digitalWrite(dirPin, HIGH);
+
   }
   else if ((digitalRead(flagPin) == LOW) && (homing == true)){
+    digitalWrite(stepPin, LOW);
+    digitalWrite(dirPin, LOW);
     lcd.clear(); 
     lcd.setCursor(0,0);
     lcd.print("Homed "); 
@@ -204,4 +209,3 @@ void reset(){
     Serial.println(currentAngle);
   }
 }
-
