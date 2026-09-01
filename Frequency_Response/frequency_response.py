@@ -136,14 +136,14 @@ def double():
         frequency1,
         dB1,
         linewidth=1.2,
-        label='Voltage 1'
+        label='Channel 1'
     )
 
     plt.semilogx(
         frequency2,
         dB2,
         linewidth=1.2,
-        label='Voltage 2'
+        label='Channel 2'
     )
 
     plt.legend()
