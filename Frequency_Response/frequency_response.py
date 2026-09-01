@@ -5,14 +5,14 @@ import glob
 import os
 import pyfar as pf
 
-
-csv_files = glob.glob('*.csv') #Takes the most recent .csv
+csv_files = "test.csv"
+#csv_files = glob.glob('*.csv') #Takes the most recent .csv
 #May change so the user can select
 
 if csv_files:
-    latest_file = max(csv_files, key=os.path.getmtime)
-    print(f"Loading files: {latest_file}")
-    
+    #latest_file = max(csv_files, key=os.path.getmtime)
+    #print(f"Loading files: {latest_file}")
+    print(f"Loading file: {csv_files}")
     #df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage', 'Remove'])
     #df = df.drop('Remove', axis=1) #For some reason the sample .csv came with an additional unused column 
 
@@ -23,13 +23,15 @@ else:
     exit()
 
 #Used later for saving purposes 
-base_name = os.path.splitext(latest_file)[0]
+#base_name = os.path.splitext(latest_file)[0]
 
+base_name = os.path.splitext(csv_files)[0]
 csv_output = f"{base_name}_revised.csv"
 png_output = f"{base_name}_revised.png"
 
 def singular(): 
-    df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage', 'Remove'])
+    #df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage', 'Remove'])
+    df = pd.read_csv(csv_files, skiprows=9, names=['Time', 'Voltage', 'Remove'])
     df = df.drop('Remove', axis=1)
     #Extracted from .csv 
     voltage = df['Voltage'].to_numpy()
@@ -82,7 +84,8 @@ def singular():
     print("New files are now saved to your system.")
     
 def double():
-    df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage1', 'Voltage2', 'Remove'])
+    #df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage1', 'Voltage2', 'Remove'])
+    df = pd.read_csv(csv_files, skiprows=9, names=['Time', 'Voltage1', 'Voltage2', 'Remove'])
     df = df.drop('Remove', axis=1)
     #Extracted from .csv 
     time = df['Time'].to_numpy()
