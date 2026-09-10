@@ -1,4 +1,4 @@
-//Draft code with TB6600 Stepper Motor Driver in mind 
+//Draft code with TB6600 Stepper Motor Driver in mind - motor ALONE 
 
 #include <LiquidCrystal.h>
 
