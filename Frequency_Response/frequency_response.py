@@ -6,37 +6,26 @@ import os
 import pyfar as pf
 
 csv_files = "test.csv"
-#csv_files = glob.glob('*.csv') #Takes the most recent .csv
-#May change so the user can select
 
 if csv_files:
-    #latest_file = max(csv_files, key=os.path.getmtime)
-    #print(f"Loading files: {latest_file}")
     print(f"Loading file: {csv_files}")
-    #df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage', 'Remove'])
-    #df = df.drop('Remove', axis=1) #For some reason the sample .csv came with an additional unused column 
-
-    #- may need to be removed later
-    #print(df.head())
 else:
     print("No CSV files found in the directory.")
     exit()
-
-#Used later for saving purposes 
-#base_name = os.path.splitext(latest_file)[0]
 
 base_name = os.path.splitext(csv_files)[0]
 csv_output = f"{base_name}_revised.csv"
 png_output = f"{base_name}_revised.png"
 
 def singular(): 
-    #df = pd.read_csv(latest_file, skiprows=9, names=['Time', 'Voltage', 'Remove'])
     df = pd.read_csv(csv_files, skiprows=9, names=['Time', 'Voltage', 'Remove'])
     df = df.drop('Remove', axis=1)
-    #Extracted from .csv 
     voltage = df['Voltage'].to_numpy()
     time = df['Time'].to_numpy()
-
+    if pascal == True:
+        sensitivity = 40
+        offset = 0.50 
+        voltage = pow(10,3) * ((voltage * sensitivity) + offset)
     sampling_rate = 1.0 / (time[1] - time[0])
 
     #Created so pyfar library can be used 
@@ -91,6 +80,15 @@ def double():
     time = df['Time'].to_numpy()
     voltage1 = df['Voltage1'].to_numpy()
     voltage2 = df['Voltage2'].to_numpy()
+    if pascal == True:
+        sensitivity = 40
+        offset = 0.50 
+        voltage1 = pow(10,3) * ((voltage1 * sensitivity) + offset)
+
+    if pascal == True:
+        sensitivity = 40
+        offset = 0.50 
+        voltage2 = pow(10,3) * ((voltage2 * sensitivity) + offset)
     
     sampling_rate = 1.0 / (time[1] - time[0])
 
@@ -163,11 +161,14 @@ def double():
 
     print("New files are now saved to your system.")
 
-while ((input != 1) and (input != 2)):
-    input = int(input("How many voltage values were measured? (TYPE: '1'  or  '2')"))
+while ((answer != 1) and (answer != 2)):
+    #answer = int(input("Are you measuring in volts or pascals? (TYPE: '1' - volts or '2' - pascals)"))
+    #if (answer == 2):
+        #pascal = True
+    answer = int(input("How many channels were measured? (TYPE: '1'  or  '2')"))
     break 
  
-if (input == 1):
+if (answer == 1):
     singular()
-if (input == 2):
+if (answer == 2):
     double()
