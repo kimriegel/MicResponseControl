@@ -13,10 +13,12 @@ const int stepDelay = 1000; //May need to be changed
 //Worm Gear Related - Values likely to change 
 const int wormStarts = 2;
 const int gearTeeth = 40;
-const float gearRatio = gearTeeth/wormStarts; 
+const float gearRatio = (float)gearTeeth / wormStarts; 
+const float outputStepsPerRev = stepsPerRev * gearRatio;
 //If wormStarts = 2, gearTeeth = 40, gearRatio = 20 
-//degrees per step = 360*20/6400 = 1.125 degrees per step
-//so to get 5 degrees it would be approx. 4.44 steps per cycle 
+//Motor must rotate 20 times for output gear to rotate once
+//Output gear steps per revolution = 6400 * 20 = 128000
+//5 degree movement = 128000 / 72 = 1777.78 motor steps
 
 //Connected to the driver 
 const int stepPin = 7;
@@ -144,13 +146,8 @@ void pulse(){
 
     currentIndex += 1;
 
-    targetStep = (long)((currentIndex * stepsPerRev) / indexPerRev); 
+    targetStep = (long)((currentIndex * outputStepsPerRev) / indexPerRev); 
     stepsToMove = targetStep - currentStep;
-
-//ex: currentIndex = 1 stepsPerRev = 51200 indexPerRev = 72 currentStep = 711.1
-//(2*51200)/72 = 711.1 
-//1422.22 - 711.1 = 711.12
-//currentStep is typically close to 711.1 however it may change slightly
 
     moveStepper(stepsToMove); //calls moveStepper function
     currentStep = targetStep;
@@ -164,7 +161,7 @@ void pulse(){
     lcd.setCursor(0,0);
     lcd.print("Done");
 
-    currentAngle = 360.0 * currentStep / stepsPerRev;     
+    currentAngle = 360.0 * currentStep / outputStepsPerRev;     
 
     Serial.println("STATUS:");
     Serial.print("Index = ");
@@ -205,13 +202,13 @@ void reset(){
     while (currentIndex > 0){
       currentIndex -= 1;
 
-      targetStep = (long)(currentIndex * stepsPerRev / indexPerRev);
+      targetStep = (long)(currentIndex * outputStepsPerRev / indexPerRev);
       stepsToMove = targetStep - currentStep;
 
       moveStepper(stepsToMove);
 
       currentStep = targetStep;
-      currentAngle = 360.0 * currentStep / stepsPerRev;
+      currentAngle = 360.0 * currentStep / outputStepsPerRev;
     }
     //prevent software discrepancies - may be unnecessary 
     currentIndex = 0;
