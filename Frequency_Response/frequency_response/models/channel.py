@@ -17,5 +17,10 @@ class Channel:
     smoothed_frequency:float
     smoothed_decibels:float
 
-def initialize_channel():
+def initialize_channel(self):
+    # Later Issue 
+    print("Hello")
 
+def validate_channel(self):
+    #Later Issue 
+    print("Hello")
