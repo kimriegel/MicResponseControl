@@ -30,14 +30,7 @@ def main():
         input = choose_option("What unit of input was used?:", ["Volts (V)", "Pascals (Pa)"])
         rows = int(input("How many rows need to be skipped before there's data? ")).strip()
 
-    revised_df = pd.DataFrame({
-        'Frequency': frequency,
-        'Magnitude_dB': dB
-    })
-
-    revised_df.to_csv(csv_output, index=False)
-
-    print("New files are now saved to your system.")
+   
 
 def choose_option(prompt, options):
     while True:
