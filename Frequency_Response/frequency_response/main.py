@@ -1,14 +1,13 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import glob
+import os
 import pyfar as pf
 
-from loader import load_file
-from detector import detect_data_start, detect_time_column, detect_signal_column, detect_units  
+from data.loader import load_file
+from data.detector import detect_data_start, detect_time_column, detect_signal_column, detect_units  
 #from channel import 
-
-if __name__ == "__main__": 
-    main()
 
 def main(): 
     load_file()
@@ -30,7 +29,14 @@ def main():
         input = choose_option("What unit of input was used?:", ["Volts (V)", "Pascals (Pa)"])
         rows = int(input("How many rows need to be skipped before there's data? ")).strip()
 
-   
+    revised_df = pd.DataFrame({
+        'Frequency': frequency,
+        'Magnitude_dB': dB
+    })
+
+    revised_df.to_csv(csv_output, index=False)
+
+    print("New files are now saved to your system.")
 
 def choose_option(prompt, options):
     while True:
@@ -44,3 +50,6 @@ def choose_option(prompt, options):
             if 1 <= choice <= len(options):
                 return options[choice - 1]
         print("Invalid choice. Please try again.")
+
+if __name__ == "__main__": 
+    main()
