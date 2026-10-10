@@ -1,33 +1,41 @@
 import React, { useState } from 'react';
 import './App.css';
+import Tab from './Components/Tab';
+import Dropdown from './Components/DropDown';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('tab1');
 
   const tabData = [
-    { id: 'tab1', label: 'Frequency Response'},
-    { id: 'tab2', label: 'Directivity'},
+    { id: 'tab1', label: 'Frequency Response', content: 'Frequency Response Content' },
+    { id: 'tab2', label: 'Directivity', content: 'Directivity Content' },
+  ];
+
+  const signalUnits = [
+    { label: 'V', onClick: () => console.log('Volts clicked') },
+    { label: 'mV', onClick: () => console.log('Milivolts clicked') },
+    { label: 'Pa', onClick: () => console.log('Pascals clicked') },
+    { label: 'mPa', onClick: () => console.log('Milipascals clicked') },
+  ];
+
+
+  const timeUnits = [
+    { label: 's', onClick: () => console.log('Seconds clicked') },
+    { label: 'ms', onClick: () => console.log('Miliseconds clicked') },
+    { label: 'µs', onClick: () => console.log('Microseconds clicked') },
   ];
 
   return (
-    <div className="tabs-container">
-      <div className="tabs-list" role="tablist">
-        {tabData.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+    <div style={{ padding: '40px' }}>
+      <Tab
+        tabData={tabData}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
-      <div className="tab-panel" role="tabpanel">
-        {tabData.find((tab) => tab.id === activeTab)?.content}
-      </div>
+      <Dropdown title="Units" items={signalUnits} />
+      <Dropdown title="Units" items={timeUnits} />
+
     </div>
   );
 }
