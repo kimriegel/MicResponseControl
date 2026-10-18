@@ -1,9 +1,15 @@
-#Needs to be properly tested 
-
 import numpy as np
 
 def convert_time(data, input_unit):
+    """
+    Checks time units and converts to seconds
+    if not already the standard unit.
+    """
+
     data = np.asarray(data, dtype=float)
+    #Refers to imported .csv file,
+    #allows for each value in time column 
+    #to be converted based on unit. 
 
     if input_unit == "s":
         return data
@@ -14,6 +20,8 @@ def convert_time(data, input_unit):
 
     raise ValueError(f"Unsupported time unit: {input_unit}")
 
+    # TODO: Support more unit types to be converted. 
+
 def convert_signal(
     data,
     input_unit,
@@ -23,7 +31,6 @@ def convert_signal(
 ):
     data = np.asarray(data, dtype=float)
 
-    # Convert input to either volts or pascals.
     if input_unit == "V":
         voltage = data
         pressure = None
@@ -39,7 +46,6 @@ def convert_signal(
     else:
         raise ValueError(f"Unsupported signal unit: {input_unit}")
 
-    # Convert between voltage and pressure if necessary.
     if output_unit in ("V", "mV"):
         if pressure is not None:
             if sensitivity_mV_per_Pa is None or sensitivity_mV_per_Pa <= 0:
