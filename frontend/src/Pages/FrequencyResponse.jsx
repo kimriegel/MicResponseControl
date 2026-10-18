@@ -1,5 +1,5 @@
-import Dropdown from '../Components/DropDown';
-
+import Dropdown from '../Components/Dropdown';
+import Textbox from '../Components/Textbox';
 
 export default function FrequencyResponse() {
    const signalUnits = [
@@ -16,11 +16,16 @@ export default function FrequencyResponse() {
     { label: 'µs', onClick: () => console.log('Microseconds clicked') },
   ];
   
+  const columnType = [
+    { label: 'Signal', onClick: () => console.log('Signal Column Selected') },
+    { label: 'Time', onClick: () => console.log('Time Column Selected') },
+  ];
 return (
     <div>
       <h2>Frequency Response</h2>
       <p>Frequency response tools will go here.</p>
-
+      <Textbox></Textbox>
+      <Dropdown title="Type" items={columnType} />
       <Dropdown title="Units" items={signalUnits} />
       <Dropdown title="Units" items={timeUnits} />
     </div>
