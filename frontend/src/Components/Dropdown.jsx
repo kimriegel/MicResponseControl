@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function Dropdown({ title, items }) {
+export default function Dropdown({ title, items, onSelect }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(title);
   const dropdownRef = useRef(null);
 
-  const toggleDropdown = () => setIsOpen((prev) => !prev);
+  useEffect(() => {
+    setSelectedItem(title);
+  }, [title]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -27,8 +30,9 @@ export default function Dropdown({ title, items }) {
   return (
     <div className="dropdown-container" ref={dropdownRef}>
       <button
+        type="button"
         className="dropdown-trigger"
-        onClick={toggleDropdown}
+        onClick={() => setIsOpen((previous) => !previous)}
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
@@ -40,20 +44,17 @@ export default function Dropdown({ title, items }) {
 
       {isOpen && (
         <ul className="dropdown-menu" role="menu">
-          {items.map((item, index) => (
-            <li key={index} className="dropdown-item" role="none">
+          {items.map((item) => (
+            <li key={item.label} className="dropdown-item" role="none">
               <button
                 type="button"
+                role="menuitem"
                 onClick={() => {
                   setSelectedItem(item.label);
-
-                  if (item.onClick) {
-                    item.onClick();
-                  }
-
+                  onSelect?.(item.label);
+                  item.onClick?.();
                   setIsOpen(false);
                 }}
-                role="menuitem"
               >
                 {item.label}
               </button>
