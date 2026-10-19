@@ -1,6 +1,18 @@
+#Used when user presses the save button for the new .csv file. 
+#This new file contains frequency in place of time, and dB in
+#place of the initial signal. 
+
 import pandas as pd
 
 def save_results_csv(channels, csv_output):
+    """
+    To make the process of analyzing frequency response
+    easier, the user can download the new .csv file
+    with calculated frequency and dB values that can then
+    be put into a spreadsheet program such as Excel or 
+    Google Sheets. The program does basic error detection
+    before saving to ensure a corrupted file is not produced. 
+    """
     if not channels:
         raise ValueError("No channels to export.")
 
