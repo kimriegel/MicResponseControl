@@ -1,5 +1,3 @@
-#How to save png with JavaScript graphing library? 
-
 import pandas as pd
 
 def save_results_csv(channels, csv_output):
