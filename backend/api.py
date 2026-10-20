@@ -1,3 +1,7 @@
+#This program file combines the frontend UI to the 
+#backend. In order to have React and Python interact
+#FastAPI was utilized. 
+
 import json
 import tempfile
 import uuid
